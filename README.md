@@ -4,6 +4,20 @@
 
 # TTY::Runner
 
+[![Gem Version](https://badge.fury.io/rb/tty-runner.svg)][gem]
+[![Build Status](https://secure.travis-ci.org/piotrmurach/tty-runner.svg?branch=master)][travis]
+[![Build status](https://ci.appveyor.com/api/projects/status/re0e9nyi6gavni77?svg=true)][appveyor]
+[![Maintainability](https://api.codeclimate.com/v1/badges/03169126a4ba2d031ece/maintainability)][codeclimate]
+[![Coverage Status](https://coveralls.io/repos/github/piotrmurach/tty-runner/badge.svg)][coverage]
+[![Inline docs](http://inch-ci.org/github/piotrmurach/tty-runner.svg?branch=master)][inchpages]
+
+[gem]: http://badge.fury.io/rb/tty-runner
+[travis]: http://travis-ci.org/piotrmurach/tty-runner
+[appveyor]: https://ci.appveyor.com/project/piotrmurach/tty-runner
+[codeclimate]: https://codeclimate.com/github/piotrmurach/tty-runner/maintainability
+[coverage]: https://coveralls.io/github/piotrmurach/tty-runner
+[inchpages]: http://inch-ci.org/github/piotrmurach/tty-runner
+
 > A command routing tree for terminal applications.
 
 **TTY::Runner** provides independent command running component for [TTY](https://github.com/piotrmurach/tty) toolkit.
