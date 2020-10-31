@@ -119,11 +119,13 @@ RSpec.describe TTY::Runner do
             on :bar, run: FooBarCommand
 
             on :baz do
-              run FooBazCommand
+              run "foo_baz_command"
             end
           end
 
           on "bar", run: BarCommand
+
+          on "qux", run: true
         end
       end)
     end
@@ -134,7 +136,8 @@ RSpec.describe TTY::Runner do
       expect(output.string).to eq([
         "Commands:",
         "  bar",
-        "  foo\n"
+        "  foo",
+        "  qux\n"
       ].join("\n"))
     end
 
@@ -164,6 +167,13 @@ RSpec.describe TTY::Runner do
       B.run(%w[foo baz], output: output)
       output.rewind
       expect(output.string).to eq("running foo baz\n")
+    end
+
+    it "fails to recognize runnable type" do
+      expect {
+        B.run(%w[qux])
+      }.to raise_error(TTY::Runner::Error,
+                      "unsupported runnable: true")
     end
   end
 

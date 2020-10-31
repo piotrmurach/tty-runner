@@ -112,8 +112,24 @@ module TTY
     # @api private
     def invoke_command(runnable)
       @lock.synchronize do
-        runnable = runnable.new if runnable.is_a?(::Class)
+        runnable = instantiate_command(runnable)
         runnable.call(*runnable_args(runnable))
+      end
+    end
+
+    # @api private
+    def instantiate_command(runnable)
+      return runnable if runnable.respond_to?(:call)
+
+      case runnable
+      when ::Class
+        runnable.new
+      when ::String, ::Symbol
+        const_name = runnable.to_s.split("_").each(&:capitalize!).join
+        runnable_class = self.class.const_get(const_name)
+        runnable_class.new
+      else
+        raise Error, "unsupported runnable: #{runnable.inspect}"
       end
     end
 
