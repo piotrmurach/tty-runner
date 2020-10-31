@@ -16,18 +16,26 @@ module TTY
       # The object to call when running command
       attr_accessor :runnable
 
+      # The method to execute on the runnable command
+      attr_accessor :action
+
       # The nested commands
       attr_reader :children
 
       # The aliases for this context command
       attr_reader :aliases
 
-      def initialize(name, parent = EMPTY, runnable: nil)
+      def initialize(name, parent = EMPTY, runnable: nil, action: default_action)
         @name = name
         @parent = parent
         @runnable = runnable
+        @action = action
         @children = {}
         @aliases = {}
+      end
+
+      def default_action
+        :call
       end
 
       # Add a child context
@@ -37,8 +45,8 @@ module TTY
       # @param [Array<String>] aliases
       #
       # @api public
-      def add(name, runnable = nil, aliases: [])
-        context = self.class.new(name, self, runnable: runnable)
+      def add(name, runnable = nil, aliases: [], action: default_action)
+        context = self.class.new(name, self, runnable: runnable, action: action)
         @children[name] = context
         aliases.each { |aliaz| @aliases[aliaz] = name }
         context

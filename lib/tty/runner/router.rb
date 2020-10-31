@@ -36,14 +36,16 @@ module TTY
       #   the command aliases
       #
       # @api public
-      def on(name, run: nil, aliases: [], &block)
+      def on(name, run: nil, aliases: [], action: :call, &block)
         name = convert(name)
 
         if block
           with_context(name, aliases: aliases, &block)
         end
 
-        @context.add(name, run, aliases: aliases) if run
+        if run
+          @context.add(name, run, aliases: aliases, action: action)
+        end
       end
 
       # Specify code to run when command is matched
@@ -51,12 +53,13 @@ module TTY
       # @param [Class] command
       #
       # @api public
-      def run(command = nil, &block)
+      def run(command = nil, action: nil, &block)
         if block && !command.nil?
           raise Error, "cannot provide both command object and block"
         end
 
         @context.runnable = block || command
+        @context.action = action if action
       end
 
       # Mount other commands runner

@@ -96,7 +96,7 @@ module TTY
 
       if context
         if context.runnable?
-          invoke_command(context.runnable)
+          invoke_command(context)
         else
           @output.puts usage(context, prefix: prefix)
         end
@@ -110,35 +110,41 @@ module TTY
     # Invoke runnable from command context
     #
     # @api private
-    def invoke_command(runnable)
+    def invoke_command(context)
       @lock.synchronize do
-        runnable = instantiate_command(runnable)
-        runnable.call(*runnable_args(runnable))
+        command = context.runnable
+        if command.is_a?(::String)
+          command, action = *command.to_s.split(/#/)
+        end
+        action ||= context.action
+
+        runnable = instantiate_command(command)
+        runnable.__send__(action, *runnable_args(runnable, action))
       end
     end
 
     # @api private
-    def instantiate_command(runnable)
-      return runnable if runnable.respond_to?(:call)
+    def instantiate_command(command)
+      return command if command.respond_to?(:call)
 
-      case runnable
+      case command
       when ::Class
-        runnable.new
+        command.new
       when ::String, ::Symbol
-        const_name = runnable.to_s.split("_").each(&:capitalize!).join
+        const_name = command.split("_").each(&:capitalize!).join
         runnable_class = self.class.const_get(const_name)
         runnable_class.new
       else
-        raise Error, "unsupported runnable: #{runnable.inspect}"
+        raise Error, "unsupported runnable: #{command.inspect}"
       end
     end
 
     # @api private
-    def runnable_args(runnable)
+    def runnable_args(runnable, action)
       arity = if runnable.respond_to?(:arity)
         runnable.arity
       else
-        runnable.method(:call).arity
+        runnable.method(action.to_sym).arity
       end
 
       if arity < 1

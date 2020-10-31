@@ -107,9 +107,21 @@ RSpec.describe TTY::Runner do
         end
       end)
 
+      stub_const("FooQuxCommand", Class.new do
+        def execute(out)
+          out.puts "running foo qux"
+        end
+      end)
+
       stub_const("BarCommand", Class.new do
-        def call(out)
+        def execute(out)
           out.puts "running bar"
+        end
+      end)
+
+      stub_const("BazCommand", Class.new do
+        def execute(out)
+          out.puts "running baz"
         end
       end)
 
@@ -121,9 +133,19 @@ RSpec.describe TTY::Runner do
             on :baz do
               run "foo_baz_command"
             end
+
+            on :qux do
+              run "foo_qux_command#execute"
+            end
+
+            on :quux do
+              run "foo_qux_command", action: :execute
+            end
           end
 
-          on "bar", run: BarCommand
+          on "bar", run: "bar_command#execute"
+
+          on "baz", run: "baz_command", action: "execute"
 
           on "qux", run: true
         end
@@ -136,6 +158,7 @@ RSpec.describe TTY::Runner do
       expect(output.string).to eq([
         "Commands:",
         "  bar",
+        "  baz",
         "  foo",
         "  qux\n"
       ].join("\n"))
@@ -147,7 +170,9 @@ RSpec.describe TTY::Runner do
       expect(output.string).to eq([
         "Commands:",
         "  foo bar",
-        "  foo baz\n"
+        "  foo baz",
+        "  foo quux",
+        "  foo qux\n"
       ].join("\n"))
     end
 
@@ -157,16 +182,34 @@ RSpec.describe TTY::Runner do
       expect(output.string).to eq("running bar\n")
     end
 
+    it "matches top level 'baz' command with custom action" do
+      B.run(%w[baz], output: output)
+      output.rewind
+      expect(output.string).to eq("running baz\n")
+    end
+
     it "matches one level deep 'bar' subcommand" do
       B.run(%w[foo bar], output: output)
       output.rewind
       expect(output.string).to eq("running foo bar\n")
     end
 
-    it "matches one levels deep 'baz' subcommand" do
+    it "matches one level deep 'baz' subcommand" do
       B.run(%w[foo baz], output: output)
       output.rewind
       expect(output.string).to eq("running foo baz\n")
+    end
+
+    it "matches one level deep 'qux' subcommand with custom action" do
+      B.run(%w[foo qux], output: output)
+      output.rewind
+      expect(output.string).to eq("running foo qux\n")
+    end
+
+    it "matches one level deep 'quux' subcommand with custom action" do
+      B.run(%w[foo quux], output: output)
+      output.rewind
+      expect(output.string).to eq("running foo qux\n")
     end
 
     it "fails to recognize runnable type" do
