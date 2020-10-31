@@ -38,7 +38,15 @@ Or install it yourself as:
 
     $ gem install tty-runner
 
-## Usage
+## Contents
+
+* [1. Usage](#1-usage)
+* [2. API](#2-api)
+  * [2.1 on](#21-on)
+  * [2.2 run](#22-run)
+  * [2.3 mount](#23-mount)
+
+## 1. Usage
 
 Here's an example of an application showing routing of commands and subcommands:
 
@@ -47,8 +55,7 @@ Here's an example of an application showing routing of commands and subcommands:
 require "tty-runner"
 
 class App < TTY::Runner
-  # The 'commands' is the main entry point for defining commands
-  # and subcommands. There is no limit for the level of possible nesting.
+  # The command line application commands are declared with the 'commands' method.
   commands do
     # Runs code inside a block when no commands are given. This is not
     # required as by default all commands will be listed instead.
@@ -144,6 +151,46 @@ app.rb tag create
 # =>
 # tag creating...
 ```
+
+## 2. API
+
+### 2.1 on
+
+Using the `on` you can specify the name for the command that will match the command line input. With the `:run` parameter you can specify a command object to run. Supported values include an object that respond to `call` method or a string given as a snake case representing an object with corresponding action.
+
+Here are few examples how to specify a command to run:
+
+```ruby
+on "cmd", run: -> { }                      # a proc to call
+on "cmd", run: Command                     # a Command object to instantiate and call
+on "cmd", run: "command"                   # invokes 'call' method by default
+on "cmd", run: "command#action"            # specified custom 'action' method
+on "cmd", run: "command", action: "action" # specifies custom 'action'
+```
+
+The same values can be provided to the `run` method inside the block:
+
+```ruby
+on "cmd" do
+  run "command#action"
+end
+```
+
+The `on` method also serves as a namespace for other (sub)commands. There is no limit on how deeply you can nest commands.
+
+```ruby
+on "foo", run: FooCommand do       # matches 'foo' and invokes 'call' on FooCommand instance
+  on "bar", run: "bar_command" do  # matches 'foo bar' and invokes 'call' on BarCommand instance
+    on "baz" do                    # matches 'foo bar baz' and invokes 'execute' on BazCommand instance
+      run "baz_command#execute"
+    end
+  end
+end
+```
+
+### 2.2 run
+
+### 2.3 mount
 
 ## Development
 
