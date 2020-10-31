@@ -192,6 +192,37 @@ end
 
 ### 2.3 mount
 
+In cases when your application grows in complexity and has many commands and each of these in turn has many subcommands, you can split and group commands into separate runner applications.
+
+For example, given a `FooSubcommands` runner application that groups all `foo` related subcommands:
+
+```ruby
+# foo_subcommands.rb
+
+class FooSubcommands < TTY::Runner
+  commands do
+    on "bar", run: -> { puts "run bar" }
+    on "baz", run: -> { puts "run baz" }
+  end
+end
+```
+
+Using `mount`, we can nest our subcommands inside the `foo` command in the main application runner like so:
+
+```ruby
+require_relative "foo_subcommands"
+
+class App < TTY::Runner
+  commands do
+    on "foo" do
+      mount Subcommands
+    end
+  end
+end
+```
+
+See [mount example](https://github.com/piotrmurach/tty-runner/blob/master/examples/mount.rb).
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
