@@ -150,7 +150,7 @@ module TTY
       if arity < 1
         []
       elsif arity == 1
-        [@output]
+        [@_parser.remaining_argv]
       end
     end
 
