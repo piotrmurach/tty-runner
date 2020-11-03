@@ -175,9 +175,11 @@ module TTY
     # @api private
     def usage(context, prefix: "")
       indent = " " * 2
+      longest_name = context.map { |name, _| name.length }.max
       list = context.each_with_object([]) do |(name, cmd_context), acc|
                next if name.empty?
-               cmd = "#{indent}#{prefix}#{' ' unless prefix.empty?}#{name}"
+               cmd = format("%s%s%-#{longest_name}s", indent,
+                            "#{prefix}#{' ' unless prefix.empty?}", name)
                acc << cmd
              end
       list.sort! { |cmd_a, cmd_b| cmd_a <=> cmd_b }

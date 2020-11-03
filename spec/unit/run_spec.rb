@@ -169,10 +169,10 @@ RSpec.describe TTY::Runner do
       stdout.rewind
       expect(stdout.string).to eq([
         "Commands:",
-        "  foo bar",
-        "  foo baz",
+        "  foo bar ",
+        "  foo baz ",
         "  foo quux",
-        "  foo qux\n"
+        "  foo qux \n"
       ].join("\n"))
     end
 
@@ -318,7 +318,7 @@ RSpec.describe TTY::Runner do
       expect(stdout.string).to eq([
         "Commands:",
         "  foo bar baz quux",
-        "  foo bar baz qux\n"
+        "  foo bar baz qux \n"
       ].join("\n"))
     end
   end
