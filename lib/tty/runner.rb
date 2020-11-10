@@ -2,6 +2,7 @@
 
 require "monitor"
 
+require_relative "runner/inflection"
 require_relative "runner/parser"
 require_relative "runner/router"
 require_relative "runner/version"
@@ -167,12 +168,8 @@ module TTY
       end
       cmds << command
 
-      const_name = cmds.map { |cmd| camelcase(cmd) }.join("::")
+      const_name = cmds.map(&Inflection.method(:camelcase)).join("::")
       self.class.commands_namespace.const_get(const_name)
-    end
-
-    def camelcase(string)
-      string.split("_").each(&:capitalize!).join
     end
 
     # @api private
