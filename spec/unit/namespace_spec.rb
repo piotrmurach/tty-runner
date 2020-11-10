@@ -34,7 +34,7 @@ RSpec.describe TTY::Runner, "namespace" do
       end)
     end
 
-    it "preprends top level 'foo' command with MyCLI::Commands" do
+    it "prepends top level 'foo' command with MyCLI::Commands" do
       expect { A.run(%w[foo]) }.to output("running FooCommand").to_stdout
     end
 
@@ -48,6 +48,17 @@ RSpec.describe TTY::Runner, "namespace" do
       expect {
         A.run(%w[foo bar baz])
       }.to output("running Foo::Bar::BazCommand").to_stdout
+    end
+  end
+
+  context "error" do
+    it "fails when namespace is not a class or a module" do
+      expect {
+        TTY::Runner.commands namespace: :invalid do
+        end
+      }.to raise_error(described_class::Error,
+                       "invalid namespace: :invalid, needs to be " \
+                       "a class or module.")
     end
   end
 end

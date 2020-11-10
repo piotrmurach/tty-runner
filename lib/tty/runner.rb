@@ -60,6 +60,10 @@ module TTY
         unless block
           raise Error, "no block provided"
         end
+        unless namespace.is_a?(Module)
+          raise Error, "invalid namespace: #{namespace.inspect}, " \
+                       "needs to be a class or module."
+        end
 
         @commands_block = block
         @commands_namespace = namespace
