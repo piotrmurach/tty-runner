@@ -113,7 +113,7 @@ module TTY
     def invoke_command(context)
       @lock.synchronize do
         command, action = *split_runnable(context)
-        runnable = instantiate_command(command)
+        runnable = instantiate_command(context, command)
         runnable.__send__(action, *runnable_args(runnable, action))
       end
     end
@@ -134,25 +134,36 @@ module TTY
     end
 
     # @api private
-    def instantiate_command(command)
+    def instantiate_command(context, command)
       return command if command.respond_to?(:call)
 
       case command
       when ::Class
         command.new
       when ::String, ::Symbol
-        to_runnable_class(command).new
+        to_runnable_class(context, command).new
       else
         raise Error, "unsupported runnable: #{command.inspect}"
       end
     end
 
     # @api private
-    def to_runnable_class(command)
+    def to_runnable_class(context, command)
       return command unless command.is_a?(::String)
 
-      const_name = command.split("_").each(&:capitalize!).join
+      cmds = []
+      until context.parent.root?
+        context = context.parent
+        cmds << context.name
+      end
+      cmds << command
+
+      const_name = cmds.map { |cmd| camelcase(cmd) }.join("::")
       self.class.const_get(const_name)
+    end
+
+    def camelcase(string)
+      string.split("_").each(&:capitalize!).join
     end
 
     # @api private

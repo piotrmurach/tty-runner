@@ -95,19 +95,19 @@ RSpec.describe TTY::Runner do
 
   context "matching commands with runnable objects" do
     before do
-      stub_const("FooBarCommand", Class.new do
+      stub_const("Foo::BarCommand", Class.new do
         def call(argv)
           puts "running foo bar"
         end
       end)
 
-      stub_const("FooBazCommand", Class.new do
+      stub_const("Foo::BazCommand", Class.new do
         def call(argv)
           puts "running foo baz"
         end
       end)
 
-      stub_const("FooQuxCommand", Class.new do
+      stub_const("Foo::QuxCommand", Class.new do
         def execute(argv)
           puts "running foo qux"
         end
@@ -128,18 +128,18 @@ RSpec.describe TTY::Runner do
       stub_const("B", Class.new(TTY::Runner) do
         commands do
           on "foo" do
-            on :bar, run: FooBarCommand
+            on :bar, run: Foo::BarCommand
 
             on :baz do
-              run "foo_baz_command"
+              run "baz_command"
             end
 
             on :qux do
-              run "foo_qux_command#execute"
+              run "qux_command#execute"
             end
 
             on :quux do
-              run "foo_qux_command", action: :execute
+              run "qux_command", action: :execute
             end
           end
 
