@@ -39,12 +39,10 @@ module TTY
       def on(name, run: nil, aliases: [], action: :call, &block)
         name = convert(name)
 
-        if block
-          with_context(name, aliases: aliases, &block)
-        end
+        with_context(name, aliases: aliases) do
+          run(run, action: action)
 
-        if run
-          @context.add(name, run, aliases: aliases, action: action)
+          block.call if block
         end
       end
 

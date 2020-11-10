@@ -375,6 +375,30 @@ RSpec.describe TTY::Runner do
     end
   end
 
+  context "matches runanble subcommand with runnable parent command" do
+    before do
+      stub_const("I", Class.new(TTY::Runner) do
+        commands do
+          on "foo", run: -> { puts "running foo"} do
+            on "bar", run: -> { puts "running bar" }
+          end
+        end
+      end)
+    end
+
+    it "runs the top level 'foo' command with runnable 'bar' subcommand" do
+      expect {
+        I.run(%w[foo])
+      }.to output("running foo\n").to_stdout
+    end
+
+    it "runs 'bar' subcommand with runnable 'foo' parent" do
+      expect {
+        I.run(%w[foo bar])
+      }.to output("running bar\n").to_stdout
+    end
+  end
+
   context "errors" do
     it "doesn't allow empty commands" do
       expect {
