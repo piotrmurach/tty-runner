@@ -2,28 +2,30 @@
 
 require_relative "../lib/tty-runner"
 
-class AddCommand
-  def call
-    puts "config adding..."
+module Config
+  class AddCommand
+    def call
+      puts "config adding..."
+    end
   end
-end
 
-class GetCommand
-  def call
-    puts "config getting..."
+  class GetCommand
+    def call
+      puts "config getting..."
+    end
   end
-end
 
-class RemoveCommand
-  def execute
-    puts "config removing..."
+  class RemoveCommand
+    def execute
+      puts "config removing..."
+    end
   end
 end
 
 class App < TTY::Runner
   commands do
     on "config" do
-      on "add", run: AddCommand
+      on "add", run: Config::AddCommand
 
       on :get, run: "get_command"
 
@@ -32,7 +34,7 @@ class App < TTY::Runner
       end
 
       on "edit" do
-        run { |out| out.puts "config editing..." }
+        run { puts "config editing..." }
       end
     end
 
