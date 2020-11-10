@@ -11,10 +11,13 @@ module TTY
     class Error < StandardError; end
 
     @commands_block = nil
+    @commands_namespace = Object
     @program_name = ::File.basename($0, ".*")
 
     module ClassMethods
       attr_reader :commands_block
+
+      attr_reader :commands_namespace
 
       attr_reader :program_name
 
@@ -22,6 +25,7 @@ module TTY
       def inherited(subclass)
         super
         subclass.instance_variable_set(:@commands_block, commands_block)
+        subclass.instance_variable_set(:@commands_namespace, commands_namespace)
         subclass.instance_variable_set(:@program_name, program_name.dup)
       end
 
@@ -52,12 +56,13 @@ module TTY
       # This should be called only once per class.
       #
       # @api public
-      def commands(&block)
+      def commands(namespace: Object, &block)
         unless block
           raise Error, "no block provided"
         end
 
         @commands_block = block
+        @commands_namespace = namespace
       end
 
       # Configure name for the runner
@@ -154,12 +159,12 @@ module TTY
       cmds = []
       until context.parent.root?
         context = context.parent
-        cmds << context.name
+        cmds.unshift(context.name)
       end
       cmds << command
 
       const_name = cmds.map { |cmd| camelcase(cmd) }.join("::")
-      self.class.const_get(const_name)
+      self.class.commands_namespace.const_get(const_name)
     end
 
     def camelcase(string)
