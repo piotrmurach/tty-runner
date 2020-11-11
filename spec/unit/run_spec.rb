@@ -429,5 +429,10 @@ RSpec.describe TTY::Runner do
           K.run
       }.to raise_error(described_class::Error, "unsupported matcher: Object")
     end
+
+    it "allows runner instance creation without commands definition" do
+      stub_const("L", Class.new(TTY::Runner))
+      expect { L.run }.to_not raise_error
+    end
   end
 end

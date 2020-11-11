@@ -89,7 +89,9 @@ module TTY
       @output = output
       @_router = Router.new
       @lock = Monitor.new
-      @_router.evaluate(&self.class.commands_block)
+      if self.class.commands_block
+        @_router.evaluate(&self.class.commands_block)
+      end
       @_parser = Parser.new(@_router.context)
     end
 
