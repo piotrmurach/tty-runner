@@ -10,18 +10,20 @@ RSpec.describe TTY::Runner do
           run { puts "running root" }
 
           on "foo" do
-            on "foo", run: -> { puts "running foo foo" }
+            on "foo", "Foo foo desc", run: -> { puts "running foo foo" }
 
             on "bar" do
+              desc "Foo bar desc"
+
               run { puts "running foo bar" }
 
-              on "baz" do
+              on "baz", "Foo bar baz desc" do
                 run { puts "running foo bar baz" }
               end
             end
           end
 
-          on "bar" do
+          on "bar", "Bar desc" do
             run { |argv| puts "running bar with #{argv}" }
           end
         end
@@ -39,8 +41,8 @@ RSpec.describe TTY::Runner do
       stdout.rewind
       expect(stdout.string).to eq([
         "Commands:",
-        "  foo bar",
-        "  foo foo\n"
+        "  foo bar  Foo bar desc",
+        "  foo foo  Foo foo desc\n"
       ].join("\n"))
     end
 

@@ -36,14 +36,25 @@ module TTY
       #   the command aliases
       #
       # @api public
-      def on(name, run: nil, aliases: [], action: :call, &block)
+      def on(name, desc = nil, run: nil, aliases: [], action: :call, &block)
         name = convert(name)
 
         with_context(name, aliases: aliases) do
+          desc(desc) if desc
+
           run(run, action: action)
 
           block.call if block
         end
+      end
+
+      # Provide summary for the command
+      #
+      # @param [String] description
+      #
+      # @api public
+      def desc(description)
+        @context.desc = description
       end
 
       # Specify code to run when command is matched

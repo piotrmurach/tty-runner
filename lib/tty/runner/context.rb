@@ -25,13 +25,18 @@ module TTY
       # The aliases for this context command
       attr_reader :aliases
 
-      def initialize(name, parent = EMPTY, runnable: nil, action: default_action)
+      # The command description
+      attr_accessor :desc
+
+      def initialize(name, parent = EMPTY, runnable: nil, action: default_action,
+                     desc: nil)
         @name = name
         @parent = parent
         @runnable = runnable
         @action = action
         @children = {}
         @aliases = {}
+        @desc = desc
       end
 
       def default_action

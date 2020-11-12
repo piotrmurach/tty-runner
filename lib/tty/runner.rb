@@ -199,6 +199,7 @@ module TTY
                next if name.empty?
                cmd = format("%s%s%-#{longest_name}s", indent,
                             "#{prefix}#{' ' unless prefix.empty?}", name)
+               cmd += "  #{cmd_context.desc}" if cmd_context.desc
                acc << cmd
              end
       list.sort! { |cmd_a, cmd_b| cmd_a <=> cmd_b }
