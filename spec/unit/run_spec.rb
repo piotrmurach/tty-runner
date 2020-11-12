@@ -7,7 +7,7 @@ RSpec.describe TTY::Runner do
     before do
       stub_const("A", Class.new(TTY::Runner) do
         commands do
-          run { puts "running root" }
+          run -> { puts "running root" }
 
           on "foo" do
             on "foo", "Foo foo desc", run: -> { puts "running foo foo" }
@@ -15,16 +15,20 @@ RSpec.describe TTY::Runner do
             on "bar" do
               desc "Foo bar desc"
 
-              run { puts "running foo bar" }
+              run -> { puts "running foo bar" }
 
               on "baz", "Foo bar baz desc" do
-                run { puts "running foo bar baz" }
+                run do
+                  def call(argv)
+                    puts "running foo bar baz with #{argv}"
+                  end
+                end
               end
             end
           end
 
           on "bar", "Bar desc" do
-            run { |argv| puts "running bar with #{argv}" }
+            run ->(argv) { puts "running bar with #{argv}" }
           end
         end
       end)
@@ -66,8 +70,8 @@ RSpec.describe TTY::Runner do
 
     it "matches two levels deep 'baz' subcommand" do
       expect {
-        A.run(%w[foo bar baz])
-      }.to output("running foo bar baz\n").to_stdout
+        A.run(%w[foo bar baz a b])
+      }.to output("running foo bar baz with [\"a\", \"b\"]\n").to_stdout
     end
 
     it "consumes only matching argument on top level" do
@@ -80,12 +84,6 @@ RSpec.describe TTY::Runner do
       A.run(%w[foo bar extra], output: stdout)
       stdout.rewind
       expect(stdout.string).to eq("Command 'foo bar extra' not found\n")
-    end
-
-    it "consumes only matching arguments two levels deep" do
-      expect {
-        A.run(%w[foo bar baz extra])
-      }.to output("running foo bar baz\n").to_stdout
     end
 
     it "fails to match top level command" do
@@ -330,14 +328,14 @@ RSpec.describe TTY::Runner do
       stub_const("H", Class.new(TTY::Runner) do
         commands do
           on "foo", aliases: %w[fo f] do
-            run { puts "running foo"}
+            run -> { puts "running foo"}
 
             on "bar", aliases: %w[r] do
-              run { puts "running foo bar"}
+              run -> { puts "running foo bar"}
             end
 
             on "baz", aliases: %w[z] do
-              run { puts "running foo baz" }
+              run -> { puts "running foo baz" }
             end
           end
 

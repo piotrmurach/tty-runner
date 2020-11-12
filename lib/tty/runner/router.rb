@@ -67,7 +67,7 @@ module TTY
           raise Error, "cannot provide both command object and block"
         end
 
-        @context.runnable = block || command
+        @context.runnable = block ? Class.new(&block) : command
         @context.action = action if action
       end
 
