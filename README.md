@@ -59,29 +59,43 @@ class App < TTY::Runner
   commands do
     # Runs code inside a block when no commands are given. This is not
     # required as by default all commands will be listed instead.
-    run { puts "root" }
+    run do
+      def call(argv)
+        puts "root"
+      end
+    end
 
-    # Matches 'config' command and lists all immediate subcommands.
+    # Matches when bare 'config' command is issued and by default
+    # lists all immediate subcommands.
     on "config" do
-      # Matches 'config add' subcommand and invokes 'AddCommand'
-      # provided via the ':run' keyword. The AddCommand needs to
-      # only provide a 'call' method.
-      on "add", run: AddCommand
+      # Matches 'config add' subcommand and loads 'Config::AddCommand' object
+      # based on the snake case name from the ':run' value. The 'Config::AddCommand'
+      # needs to only implement a 'call' method that will be automatically invoked.
+      on "add", "Add a new entry", run: "add_command"
 
-      # The run keyword accepts any callable object like a proc that will be
+      # The :run keyword accepts any callable object like a proc that will be
       # lazily evaluated when the 'config remove' command or 'config rm' alias
       # are matched.
       on "remove", aliases: %w[rm], run: -> { puts "removing from config..." }
 
-      # The command can be given with a 'run' helper that will instantiate
-      # and execute 'GetCommand' when 'config get' command is entered.
+      # The command can be given in an "command#action" format either via :run
+      # keyword or using the 'run' helper method.
+      # This will automatically convert 'get_command' into 'Config::GetCommand'
+      # when 'config get' command is entered and invoke the 'execute' method.
       on "get" do
-        run GetCommand
+        run "get_command#execute"
       end
 
-      # The 'run' helper will also execute a block when 'edit' subcommand matches.
+      # The 'run' helper can also accept a block that will be converted to
+      # a command object when 'edit' subcommand is matched. It expects
+      # a 'call' method implementation that optionally gets the rest of
+      # unparsed command line arguments as a parameter.
       on "edit" do
-        run { puts "editing..." }
+        run do
+          def call(argv)
+            puts "editing with #{argv}"
+          end
+        end
       end
     end
 
@@ -101,11 +115,11 @@ end
 class TagCommands < TTY::Runner
   commands do
     on "create" do
-      run { puts "tag creating..." }
+      run -> { puts "tag creating..." }
     end
 
     on "delete" do
-      run { puts "tag deleting..." }
+      run -> { puts "tag deleting..." }
     end
   end
 end
