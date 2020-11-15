@@ -31,6 +31,25 @@ end
 class App < TTY::Runner
   commands do
     on "add", "Add config entry", run: "add_command#run"
+
+    on "get", "Get config entry" do
+      run do
+        program :app
+
+        command :get
+
+        desc "Get an entry by name"
+
+        argument :name do
+          required
+          desc "The name of the configured option"
+        end
+
+        def call(argv)
+          puts "config getting #{params["name"]}"
+        end
+      end
+    end
   end
 end
 
