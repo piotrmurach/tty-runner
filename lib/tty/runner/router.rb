@@ -70,7 +70,7 @@ module TTY
 
         if block
           runnable = Class.new
-          runnable.include(@mod_extension) if @mod_extension
+          runnable.__send__(:include, @mod_extension) if @mod_extension
           runnable.module_eval(&block)
         else
           runnable = command
