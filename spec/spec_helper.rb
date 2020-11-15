@@ -18,7 +18,15 @@ end
 require "bundler/setup"
 require "tty/runner"
 
+module TestHelpers
+  def unindent(s)
+    s.gsub(/^#{s.scan(/^[ \t]+(?=\S)/).min}/, "")
+  end
+end
+
 RSpec.configure do |config|
+  config.include(TestHelpers)
+
   config.expect_with :rspec do |expectations|
     expectations.include_chain_clauses_in_custom_matcher_descriptions = true
     expectations.max_formatted_output_length = nil
