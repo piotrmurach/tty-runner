@@ -3,6 +3,7 @@
 require "monitor"
 
 require_relative "runner/inflection"
+require_relative "runner/interceptor"
 require_relative "runner/parser"
 require_relative "runner/router"
 require_relative "runner/version"
@@ -125,7 +126,13 @@ module TTY
     def invoke_command(context)
       @lock.synchronize do
         command, action = *split_runnable(context)
-        runnable = instantiate_command(context, command)
+        runnable = load_command_class(context, command)
+
+        if runnable.is_a?(Module)
+          Interceptor.intercept(runnable, action: action)
+          runnable = runnable.new
+        end
+
         runnable.__send__(action, *runnable_args(runnable, action))
       end
     end
@@ -146,14 +153,14 @@ module TTY
     end
 
     # @api private
-    def instantiate_command(context, command)
+    def load_command_class(context, command)
       return command if command.respond_to?(:call)
 
       case command
       when ::Class
-        command.new
+        command
       when ::String, ::Symbol
-        to_runnable_class(context, command).new
+        to_runnable_class(context, command)
       else
         raise Error, "unsupported runnable: #{command.inspect}"
       end
