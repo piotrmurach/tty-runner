@@ -88,7 +88,7 @@ module TTY
 
     def initialize(output: $stdout)
       @output = output
-      @_router = Router.new
+      @_router = Router.new(mod_extension: TTY::Option)
       @lock = Monitor.new
       if self.class.commands_block
         @_router.evaluate(&self.class.commands_block)

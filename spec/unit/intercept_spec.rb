@@ -82,4 +82,49 @@ RSpec.describe TTY::Runner, "intercepting action" do
       }.to output(help_info).to_stderr
     end
   end
+
+  context "anonymous command" do
+    before do
+      stub_const("B", Class.new(TTY::Runner) do
+        commands do
+          on "foo" do
+            run do
+              command :foo
+
+              argument :a, desc: "A desc"
+
+              option :b, short: "-b N", desc: "B desc"
+
+              def call
+                puts "foo a=#{params[:a]} b=#{params[:b]}"
+              end
+            end
+          end
+        end
+      end)
+    end
+
+    it "parses parameters" do
+      expect {
+        B.run(%w[foo 1 -b 2])
+      }.to output("foo a=1 b=2\n").to_stdout
+    end
+
+    it "displays help information" do
+      help_info = unindent(<<-EOS)
+      Usage: rspec foo [OPTIONS] A
+
+      Arguments:
+        A  A desc
+
+      Options:
+        -h, --help  Print usage
+        -b          B desc
+      EOS
+
+      expect {
+        expect { B.run(%w[foo -h]) }.to raise_error(SystemExit)
+      }.to output(help_info).to_stderr
+    end
+  end
 end

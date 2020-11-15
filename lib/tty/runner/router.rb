@@ -8,8 +8,9 @@ module TTY
     class Router
       attr_reader :context
 
-      def initialize
+      def initialize(mod_extension: nil)
         @context = Context.new("")
+        @mod_extension = mod_extension
       end
 
       # Evaluate all commands
@@ -67,7 +68,15 @@ module TTY
           raise Error, "cannot provide both command object and block"
         end
 
-        @context.runnable = block ? Class.new(&block) : command
+        if block
+          runnable = Class.new
+          runnable.include(@mod_extension) if @mod_extension
+          runnable.module_eval(&block)
+        else
+          runnable = command
+        end
+
+        @context.runnable = runnable
         @context.action = action if action
       end
 
