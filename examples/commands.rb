@@ -36,7 +36,11 @@ class App < TTY::Runner
       end
 
       on "edit", "Open an editor" do
-        run { puts "config editing..." }
+        run do
+          def call(argv)
+            puts "config editing with #{argv}"
+          end
+        end
       end
     end
 
