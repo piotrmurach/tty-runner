@@ -12,7 +12,7 @@ module TTY
 
         runnable.extend(ClassMethods)
         runnable.add_help_flag if runnable.respond_to?(:parameters)
-        runnable.redefine_action(action)
+        runnable.redefine_action(action) if runnable.method_defined?(action)
       end
 
       module ClassMethods

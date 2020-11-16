@@ -133,7 +133,11 @@ module TTY
           runnable = runnable.new
         end
 
-        runnable.__send__(action, *runnable_args(runnable, action))
+        if runnable.respond_to?(action)
+          runnable.__send__(action, *runnable_args(runnable, action))
+        else
+          raise Error, "missing command action: #{action.to_s.inspect}"
+        end
       end
     end
 

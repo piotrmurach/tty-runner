@@ -83,6 +83,26 @@ RSpec.describe TTY::Runner, "intercepting action" do
     end
   end
 
+  context "defined command without action" do
+    it "raises error when action definition is missing" do
+      stub_const("FooCommand", Class.new do
+        include TTY::Option
+
+        # no action
+      end)
+
+      stub_const("X", Class.new(TTY::Runner) do
+        commands do
+          on "foo", run: "foo_command#execute"
+        end
+      end)
+
+      expect {
+        X.run(%w[foo])
+      }.to raise_error(TTY::Runner::Error, "missing command action: \"execute\"")
+    end
+  end
+
   context "anonymous command" do
     before do
       stub_const("B", Class.new(TTY::Runner) do
@@ -125,6 +145,24 @@ RSpec.describe TTY::Runner, "intercepting action" do
       expect {
         expect { B.run(%w[foo -h]) }.to raise_error(SystemExit)
       }.to output(help_info).to_stderr
+    end
+  end
+
+  context "anonymous class without action" do
+    it "raises error when action definition is missing" do
+      stub_const("X", Class.new(TTY::Runner) do
+        commands do
+          on "foo" do
+            run do
+              # no action
+            end
+          end
+        end
+      end)
+
+      expect {
+        X.run(%w[foo])
+      }.to raise_error(TTY::Runner::Error, "missing command action: \"call\"")
     end
   end
 end
