@@ -27,7 +27,7 @@ module TTY
         def redefine_action(action)
           module_eval do
             new_action = :"#{action}"
-            old_action = :"#{action}!"
+            old_action = :"tty_runner_original_#{action}"
 
             alias_method old_action, new_action
 
