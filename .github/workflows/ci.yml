@@ -28,7 +28,7 @@ jobs:
           - truffleruby-head
         os:
           - ubuntu-latest
-      continue-on-error: ${{ endsWith(matrix.ruby, 'head') }}
+    continue-on-error: ${{ endsWith(matrix.ruby, 'head') }}
     steps:
       - uses: actions/checkout@v2
       - name: Set up Ruby
