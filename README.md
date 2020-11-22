@@ -194,15 +194,109 @@ The `on` method also serves as a namespace for other (sub)commands. There is no 
 
 ```ruby
 on "foo", run: FooCommand do       # matches 'foo' and invokes 'call' on FooCommand instance
-  on "bar", run: "bar_command" do  # matches 'foo bar' and invokes 'call' on BarCommand instance
-    on "baz" do                    # matches 'foo bar baz' and invokes 'execute' on BazCommand instance
-      run "baz_command#execute"
+  on "bar", run: "bar_command" do  # matches 'foo bar' and invokes 'call' on Foo::BarCommand instance
+    on "baz" do                    # matches 'foo bar baz' and
+      run "baz_command#execute"    # invokes 'execute' on Foo::Bar::BazCommand instance
     end
   end
 end
 ```
 
 ### 2.2 run
+
+There are two ways to specify a command, with a `:run` keyword or a `run` helper.
+
+The `:run` keyword is used by `on` method and accepts the following values as a command:
+
+```ruby
+on "cmd", run: -> { ... }            # a proc object
+on "cmd", run: ->(argv) { ... }      # a proc object with optional unparsed arguments
+on "cmd", run: FooCommand            # a FooCommand object with 'call' method
+on "cmd", run: "foo_command"         # expands name to a FooCommand object
+on "cmd", run: "foo_command#action"  # expands name to a FooCommand object with 'action' method
+```
+
+The `run` helper supports all of the above values but differs with the ability to create a more complex command on-the-fly by specifying it inside a block.
+
+For example, the following creates a command that will be run when 'foo' is entered in the terminal:
+
+```ruby
+on "foo" do
+  run do
+    def call(argv)
+      ...
+    end
+  end
+end
+```
+
+The [tty-option](https://github.com/piotrmurach/tty-option) supercharges the `run` helper with many methods for argument and option parsing as well as generating command documentation. Please read the documentation to learn what is possible.
+
+For a quick example, to add 'foo' command with one argument and `--baz` option, we can do:
+
+```ruby
+on "foo" do
+  run do
+    program "app"
+
+    command "foo"
+
+    desc "Run foo command"
+
+    argument :bar do
+      required
+      desc "The bar argument"
+    end
+
+    option :baz do
+      short "-b"
+      long "--baz list"
+      arity one_or_more
+      convert :int_list
+      desc "The baz option"
+    end
+
+    def call
+      puts params["bar"]
+      puts params["baz"]
+    end
+  end
+end
+```
+
+When run with the following command line inputs:
+
+```
+app foo one --baz 11 12
+```
+
+The output would produce:
+
+```
+one
+[11, 12]
+```
+
+You will automatically get `-h` and `--help` options for free, so running:
+
+```
+app foo --help
+```
+
+Will output:
+
+```
+Usage: app foo [OPTIONS] BAR
+
+Run foo command
+
+Arguments:
+  BAR  The bar argument
+
+Options:
+  -b, --baz   The baz option
+  -h, --help  Print usage
+```
 
 ### 2.3 mount
 
@@ -229,7 +323,7 @@ require_relative "foo_subcommands"
 class App < TTY::Runner
   commands do
     on "foo" do
-      mount Subcommands
+      mount FooSubcommands
     end
   end
 end
