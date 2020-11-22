@@ -4,9 +4,17 @@ on:
   push:
     branches:
       - master
+    paths-ignore:
+      - "bin/**"
+      - "*.md"
+      - "examples/**"
   pull_request:
     branches:
       - master
+    paths-ignore:
+      - "bin/**"
+      - "*.md"
+      - "examples/**"
 jobs:
   tests:
     name: Ruby ${{ matrix.ruby }}
