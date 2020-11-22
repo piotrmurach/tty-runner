@@ -24,6 +24,8 @@ module TestHelpers
   end
 end
 
+Dir[::File.join(__dir__, "support/**/*.rb")].each(&method(:require))
+
 RSpec.configure do |config|
   config.include(TestHelpers)
 
