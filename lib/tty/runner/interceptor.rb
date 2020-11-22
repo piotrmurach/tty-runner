@@ -44,7 +44,7 @@ module TTY
               arity = req_args.size
               args = arity < 1 ? [] : [argv]
 
-              __send__(old_action, *args)
+              public_send(old_action, *args)
             end
           end
         end
