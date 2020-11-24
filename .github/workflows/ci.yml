@@ -29,7 +29,6 @@ jobs:
           - 2.4
           - 2.5
           - 2.6
-          - 2.7
           - ruby-head
           - jruby-9.2.13.0
           - jruby-head
@@ -54,5 +53,7 @@ jobs:
         run: bundle install --jobs 4 --retry 3
       - name: Run tests
         run: bundle exec rake ci
-        env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+      - name: Send coverage to Coveralls
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
