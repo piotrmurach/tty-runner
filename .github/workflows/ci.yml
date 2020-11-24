@@ -41,6 +41,7 @@ jobs:
             coverage: true
     env:
       COVERAGE: ${{ matrix.coverage }}
+      COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
     continue-on-error: ${{ endsWith(matrix.ruby, 'head') }}
     steps:
       - uses: actions/checkout@v2
@@ -54,7 +55,3 @@ jobs:
         run: bundle install --jobs 4 --retry 3
       - name: Run tests
         run: bundle exec rake ci
-      - name: Send coverage to Coveralls
-        uses: coverallsapp/github-action@master
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}

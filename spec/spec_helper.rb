@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-if ENV["COVERAGE"]
+if ENV["COVERAGE"] == "true"
   require "simplecov"
   require "coveralls"
 
