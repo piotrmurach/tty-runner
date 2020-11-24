@@ -22,6 +22,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        os:
+          - ubuntu-latest
         ruby:
           - 2.1
           - 2.2
@@ -35,9 +37,8 @@ jobs:
           - truffleruby-head
         include:
           - ruby: 2.7
+            os: ubuntu-latest
             coverage: true
-        os:
-          - ubuntu-latest
     env:
       COVERAGE: ${{ matrix.coverage }}
     continue-on-error: ${{ endsWith(matrix.ruby, 'head') }}
