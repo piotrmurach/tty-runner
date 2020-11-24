@@ -34,8 +34,13 @@ jobs:
           - jruby-9.2.13.0
           - jruby-head
           - truffleruby-head
+        include:
+          - ruby: 2.7
+            coverage: true
         os:
           - ubuntu-latest
+    env:
+      COVERAGE: ${{ matrix.coverage }}
     continue-on-error: ${{ endsWith(matrix.ruby, 'head') }}
     steps:
       - uses: actions/checkout@v2
@@ -50,4 +55,4 @@ jobs:
       - name: Run tests
         run: bundle exec rake ci
         env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
