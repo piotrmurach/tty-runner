@@ -14,12 +14,15 @@ module TTY
 
     @commands_block = nil
     @commands_namespace = Object
+    @commands_path = nil
     @program_name = ::File.basename($0, ".*")
 
     module ClassMethods
       attr_reader :commands_block
 
       attr_reader :commands_namespace
+
+      attr_reader :commands_path
 
       attr_reader :program_name
 
@@ -29,6 +32,24 @@ module TTY
         subclass.instance_variable_set(:@commands_block, commands_block)
         subclass.instance_variable_set(:@commands_namespace, commands_namespace)
         subclass.instance_variable_set(:@program_name, program_name.dup)
+        subclass.instance_variable_set(:@commands_path, commands_path)
+      end
+
+      # Define directory to load commands from
+      #
+      # @example
+      #   commands_dir "cli/commands"
+      #
+      # @raise [TTY::Runner::Error]
+      #
+      # @api public
+      def commands_dir(dir)
+        abs_path = ::File.expand_path(dir)
+        if ::File.directory?(abs_path)
+          @commands_path = abs_path
+        else
+          raise Error, "directory #{abs_path} does not exist"
+        end
       end
 
       # Run commands
@@ -180,6 +201,11 @@ module TTY
         cmds.unshift(context.name)
       end
       cmds << command
+
+      if self.class.commands_path
+        cmd_path = ::File.join(self.class.commands_path, *cmds)
+        Kernel.require(cmd_path) if ::File.exist?("#{cmd_path}.rb")
+      end
 
       const_name = cmds.map(&Inflection.method(:camelcase)).join("::")
       self.class.commands_namespace.const_get(const_name)
