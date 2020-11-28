@@ -2,8 +2,8 @@
 
 require "monitor"
 
-require_relative "runner/inflection"
 require_relative "runner/interceptor"
+require_relative "runner/loader"
 require_relative "runner/parser"
 require_relative "runner/router"
 require_relative "runner/version"
@@ -14,15 +14,12 @@ module TTY
 
     @commands_block = nil
     @commands_namespace = Object
-    @commands_path = nil
     @program_name = ::File.basename($0, ".*")
 
     module ClassMethods
       attr_reader :commands_block
 
       attr_reader :commands_namespace
-
-      attr_reader :commands_path
 
       attr_reader :program_name
 
@@ -32,24 +29,25 @@ module TTY
         subclass.instance_variable_set(:@commands_block, commands_block)
         subclass.instance_variable_set(:@commands_namespace, commands_namespace)
         subclass.instance_variable_set(:@program_name, program_name.dup)
-        subclass.instance_variable_set(:@commands_path, commands_path)
       end
 
-      # Define directory to load commands from
+      # Commands loader
       #
-      # @example
-      #   commands_dir "cli/commands"
+      # @api private
+      def _loader
+        @_loader ||= Loader.new
+      end
+
+      # Define a directory to load
       #
-      # @raise [TTY::Runner::Error]
+      # @param [String] dir
+      #   the commands directory path
+      # @param [Object] namespace
+      #   the namespace for all commands inside the directory
       #
       # @api public
-      def commands_dir(dir)
-        abs_path = ::File.expand_path(dir)
-        if ::File.directory?(abs_path)
-          @commands_path = abs_path
-        else
-          raise Error, "directory #{abs_path} does not exist"
-        end
+      def commands_dir(dir, namespace: Object)
+        _loader.add_dir(dir, namespace: namespace)
       end
 
       # Run commands
@@ -202,13 +200,8 @@ module TTY
       end
       cmds << command
 
-      if self.class.commands_path
-        cmd_path = ::File.join(self.class.commands_path, *cmds)
-        Kernel.require(cmd_path) if ::File.exist?("#{cmd_path}.rb")
-      end
-
-      const_name = cmds.map(&Inflection.method(:camelcase)).join("::")
-      self.class.commands_namespace.const_get(const_name)
+      self.class._loader.load_command(*cmds, namespace:
+                                      self.class.commands_namespace)
     end
 
     # @api private

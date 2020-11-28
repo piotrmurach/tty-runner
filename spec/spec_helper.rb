@@ -22,6 +22,10 @@ module TestHelpers
   def unindent(s)
     s.gsub(/^#{s.scan(/^[ \t]+(?=\S)/).min}/, "")
   end
+
+  def remove_const(const_name, parent: Object)
+    parent.__send__(:remove_const, const_name)
+  end
 end
 
 Dir[::File.join(__dir__, "support/**/*.rb")].each(&method(:require))
